@@ -22,6 +22,7 @@ function onOpen() {
       .addItem('毎朝の自動チェックをオフにする', 'menuTriggerOff')
       .addSeparator()
       .addItem('セルフテストを実行', 'menuSelfTest')
+      .addItem('ダッシュボードだけ作り直す（データはそのまま）', 'menuRebuildDashboard')
       .addSeparator()
       .addItem('初期セットアップ（デモデータで作り直す）', 'menuSetupWithDemo')
       .addItem('空の状態で作り直す（本番運用の開始）', 'menuSetupEmpty'))
@@ -162,6 +163,16 @@ function menuSelfTest() {
     const r = runSelfTest();
     getSs_().setActiveSheet(getSheet_(SHEET.selfTest));
     ui.alert('セルフテスト', r.passed + '件成功 / ' + r.failed + '件失敗 / ' + r.warned + '件注意\n詳しくは「' + SHEET.selfTest + '」シートを確認してください。', ui.ButtonSet.OK);
+  });
+}
+
+function menuRebuildDashboard() {
+  withUi_(function (ui) {
+    buildDashboard_();
+    SpreadsheetApp.flush();
+    writeLog_('ダッシュボード再作成', '', true, '数式とグラフを作り直しました（データは変更なし）');
+    getSs_().setActiveSheet(getSheet_(SHEET.dashboard));
+    ui.alert('ダッシュボード', 'ダッシュボードを作り直しました。案件・明細・入金のデータは変更していません。', ui.ButtonSet.OK);
   });
 }
 

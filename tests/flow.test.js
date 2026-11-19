@@ -51,6 +51,10 @@ test('通し動作：セットアップから入金・督促まで', () => {
   assert.match(res.message, /見本PDF：INV-\d{6}-\d{3}、Q-\d{6}-\d{3}/);
   const dash = ss.getSheetByName(g.SHEET.dashboard);
   assert.equal(dash.charts.length, 2, 'グラフ 2 つ');
+  // Sheets の SUMIFS/COUNTIF は ARRAYFORMULA なしで配列の条件 {..} を渡すと先頭しか使わない（実機で発覚）
+  for (const f of dash.formulas.values()) {
+    if (/(SUMIFS|COUNTIFS?|MAXIFS)\([^)]*\{"/.test(f)) assert.match(f, /ARRAYFORMULA/, f);
+  }
   const pdfs = [...drive.files.values()];
   assert.equal(pdfs.length, 2);
   assert.match(pdfs[0].name, /^請求書_INV-\d{6}-\d{3}_.+\.pdf$/);
@@ -192,6 +196,12 @@ test('通し動作：セットアップから入金・督促まで', () => {
   assert.match(gmail.sent[0].subject, /未入金アラート/);
   g.setDailyTrigger_(false);
   assert.equal(ctx.triggers.length, 0);
+
+  // ダッシュボードだけの作り直しではデータが変わらない
+  const before = JSON.stringify(g.readTable_('deals'));
+  g.menuRebuildDashboard();
+  assert.equal(JSON.stringify(g.readTable_('deals')), before);
+  assert.equal(ss.getSheetByName(g.SHEET.dashboard).charts.length, 2);
 
   // 10) 開いたときのトースト
   g.onOpen();

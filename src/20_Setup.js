@@ -424,11 +424,12 @@ function buildDashboard_() {
   const prevStart = '(EOMONTH(TODAY(),-2)+1)';
   const prevEnd = 'EOMONTH(TODAY(),-1)';
   const salesBetween = function (a, b) { return 'SUMIFS(' + D + 'G:G,' + D + 'N:N,">="&' + a + ',' + D + 'N:N,"<="&' + b + ')'; };
-  const unpaidStatuses = '{"未入金","一部入金","期限超過"}';
+  // 残高が正の請求 = 未入金・一部入金・期限超過（未請求・失注は空欄、入金済は 0 以下）。
+  // ※ SUMIFS に配列の条件 {"未入金",…} を渡すと、Sheets では ARRAYFORMULA なしだと先頭の条件しか使われない
   const cards = [
     { range: ['B', 'C'], label: '今月の売上（税抜・請求ベース）', value: '=' + salesBetween(monthStart, monthEnd), sub: '="前月 "&TEXT(' + salesBetween(prevStart, prevEnd) + ',"¥#,##0")&"　／　今月の請求 "&COUNTIFS(' + D + 'N:N,">="&' + monthStart + ',' + D + 'N:N,"<="&' + monthEnd + ')&"件"', color: THEME.ink },
     { range: ['D', 'E'], label: '見積中（回答待ち・税込）', value: '=SUMIFS(' + D + 'I:I,' + D + 'F:F,"見積中")', sub: '=COUNTIF(' + D + 'F:F,"見積中")&"件の見積が回答待ち"', color: THEME.ink },
-    { range: ['F', 'H'], label: '未入金残高（税込）', value: '=SUM(SUMIFS(' + D + 'S:S,' + D + 'T:T,' + unpaidStatuses + '))', sub: '=SUM(COUNTIF(' + D + 'T:T,' + unpaidStatuses + '))&"件の請求が入金待ち"', color: THEME.ink },
+    { range: ['F', 'H'], label: '未入金残高（税込）', value: '=SUMIFS(' + D + 'S:S,' + D + 'S:S,">0")', sub: '=COUNTIF(' + D + 'S:S,">0")&"件の請求が入金待ち"', color: THEME.ink },
     { range: ['I', 'K'], label: '期限超過（税込）', value: '=SUMIFS(' + D + 'S:S,' + D + 'T:T,"期限超過")', sub: '=IF(COUNTIF(' + D + 'T:T,"期限超過")=0,"期限超過はありません",COUNTIF(' + D + 'T:T,"期限超過")&"件　／　最長 "&MAXIFS(' + D + 'U:U,' + D + 'T:T,"期限超過")&"日超過")', color: '#b42318' },
   ];
   cards.forEach(function (c) {
