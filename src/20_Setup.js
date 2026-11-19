@@ -405,6 +405,7 @@ function buildDashboard_() {
   const D = q_(SHEET.deals);
   const P = q_(SHEET.payments);
   const S = q_(SHEET.settings);
+  resetSheet_(sh); // 作り直し時に古いグラフ・書式が残らないよう毎回まっさらにする
   fitSize_(sh, 70, 14);
   const widths = [16, 120, 170, 170, 100, 110, 92, 92, 92, 92, 92, 92, 92, 16];
   widths.forEach(function (w, i) { sh.setColumnWidth(i + 1, w); });
