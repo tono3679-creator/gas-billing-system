@@ -1,0 +1,12 @@
+{
+  "name": "gas-billing-system",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Google スプレッドシート＋Apps Script の見積・請求・入金管理システム",
+  "scripts": {
+    "test": "TZ=Asia/Tokyo node --test tests/*.test.js",
+    "push": "clasp push",
+    "preview": "TZ=Asia/Tokyo node scripts/preview.js"
+  },
+  "engines": { "node": ">=20" }
+}
