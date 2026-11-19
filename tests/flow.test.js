@@ -51,6 +51,13 @@ test('通し動作：セットアップから入金・督促まで', () => {
   assert.match(res.message, /見本PDF：INV-\d{6}-\d{3}、Q-\d{6}-\d{3}/);
   const dash = ss.getSheetByName(g.SHEET.dashboard);
   assert.equal(dash.charts.length, 2, 'グラフ 2 つ');
+  // 埋め込みグラフのオプションはドット区切りのキーと単純な値で渡す（オブジェクトで渡すと実機で空白になった）
+  for (const c of dash.charts) {
+    for (const [k, v] of Object.entries(c.opts)) {
+      assert.ok(Array.isArray(v) || typeof v !== 'object', `グラフのオプション ${k} がオブジェクト`);
+      assert.ok(!/%$/.test(String(v)), `グラフのオプション ${k} に割合指定`);
+    }
+  }
   // Sheets の SUMIFS/COUNTIF は ARRAYFORMULA なしで配列の条件 {..} を渡すと先頭しか使わない（実機で発覚）
   for (const f of dash.formulas.values()) {
     if (/(SUMIFS|COUNTIFS?|MAXIFS)\([^)]*\{"/.test(f)) assert.match(f, /ARRAYFORMULA/, f);
